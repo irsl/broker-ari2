@@ -65,6 +65,9 @@ func (h *AuthHook) OnConnectAuthenticate(cl *mqtts.Client, pk packets.Packet) bo
 
 	if Config.Mqtt_proxy_upstream == "" {
 		// proxying is disabled
+		clientMap[cl.ID] = mqttClient{
+		}
+
 		return true
 	}
 
@@ -224,22 +227,6 @@ func mqttLogic() {
 
 	// Parameter scan
 	go func() {
-		// Wait for the first client
-		for {
-			connected := false
-			for clientId := range clientMap {
-				if clientMap[clientId].client.IsConnected() {
-					connected = true
-					break
-				}
-			}
-			if connected {
-				time.Sleep(time.Duration(2) * time.Second)
-				break
-			}
-			time.Sleep(time.Duration(1) * time.Second)
-		}
-
 		for {
 			for clientId := range clientMap {
 				mqtt_log_Printf("requesting parameters: %v", clientId)
@@ -284,21 +271,6 @@ func mqttLogic() {
 
 	// Consumption scan
 	go func() {
-		// Wait for the first client
-		for {
-			connected := false
-			for clientId := range clientMap {
-				if clientMap[clientId].client.IsConnected() {
-					connected = true
-					break
-				}
-			}
-			if connected {
-				time.Sleep(time.Duration(10) * time.Second)
-				break
-			}
-			time.Sleep(time.Duration(1) * time.Second)
-		}
 		for {
 			for clientId := range clientMap {
 				mqtt_log_Printf("requesting consumptions: %v", clientId)
